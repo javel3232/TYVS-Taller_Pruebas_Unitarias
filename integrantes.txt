@@ -1,0 +1,9 @@
+Integrantes del equipo
+======================
+
+[Agrega aquí tu nombre completo]
+[Agrega aquí el nombre de tu compañero/a si aplica]
+
+Curso: Testing y Validación de Software
+Programa: Maestría en Ingeniería de Software – Universidad de La Sabana
+Año: 2025

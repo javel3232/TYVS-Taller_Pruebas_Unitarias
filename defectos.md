@@ -1,73 +1,67 @@
-# Registro de Defectos
+# Registro de Defectos – Taller Pruebas Unitarias Registraduría
 
-Este documento recopila los defectos encontrados durante la ejecución de pruebas unitarias del proyecto **Registraduría**.
-Cada defecto debe documentarse claramente para facilitar su análisis y corrección.
-
----
-
-## Formato 1: Lista detallada (narrativa)
-
-### Defecto 01
-
-- **Caso de prueba**: Persona con edad -1 (edad inválida).
-- **Entrada**: `Person(name="Juan", id=101, age=-1, gender=MALE, alive=true)`
-- **Resultado esperado**: `INVALID_AGE`
-- **Resultado obtenido**: `VALID`
-- **Causa probable**: Falta de validación de edad negativa en `Registry.registerVoter`.
-- **Estado**: Abierto
+> Archivo de gestión de defectos encontrados durante el desarrollo TDD.
 
 ---
 
-### Defecto 02
+## Defecto 01
 
-- **Caso de prueba**: Persona muerta.
-- **Entrada**: `Person(name="Ana", id=102, age=45, gender=FEMALE, alive=false)`
-- **Resultado esperado**: `DEAD`
-- **Resultado obtenido**: `VALID`
-- **Causa probable**: No se evalúa la condición `alive=false`.
-- **Estado**: Abierto
-
----
-
-### Defecto 03
-
-- **Caso de prueba**: Registro duplicado con el mismo `id`.
-- **Entradas**:
-  - Persona 1: `Person(name="Carlos", id=200, age=30, gender=MALE, alive=true)`
-  - Persona 2: `Person(name="Carla", id=200, age=25, gender=FEMALE, alive=true)`
-- **Resultado esperado**:
-  - Persona 1 → `VALID`
-  - Persona 2 → `DUPLICATED`
-- **Resultado obtenido**:
-  - Persona 1 → `VALID`
-  - Persona 2 → `VALID`
-- **Causa probable**: No hay verificación de `id` previamente registrado.
-- **Estado**: Abierto
+| Campo            | Detalle                                                                                  |
+|------------------|------------------------------------------------------------------------------------------|
+| **ID**           | DEF-01                                                                                   |
+| **Caso**         | Persona con edad negativa (`age = -1`)                                                   |
+| **Esperado**     | `INVALID_AGE`                                                                            |
+| **Obtenido**     | `VALID` (implementación inicial sin validación de rango de edad)                         |
+| **Causa**        | La implementación stub de `Registry.registerVoter()` retornaba `VALID` sin validaciones |
+| **Ciclo TDD**    | RED – la prueba `shouldReturnInvalidAgeWhenAgeIsNegative()` falló correctamente          |
+| **Corrección**   | Se agregó: `if (person.getAge() < 0 || person.getAge() > MAX_AGE) return INVALID_AGE;`  |
+| **Estado**       | ✅ Cerrado                                                                               |
 
 ---
 
-## Formato 2: Tabla de defectos (bug tracking)
+## Defecto 02
 
-| ID | Caso de Prueba | Entrada | Resultado Esperado | Resultado Obtenido | Causa Probable | Estado |
-|-----|---------------------|---------|--------------------|--------------------|----------------|--------|
-| 01 | Edad inválida | `Person(id=101, age=-1, alive=true)` | `INVALID_AGE` | `VALID` | No se valida edad negativa | Abierto |
-| 02 | Persona muerta | `Person(id=102, age=45, alive=false)` | `DEAD` | `VALID` | No se evalúa condición `alive=false` | Abierto |
-| 03 | Registro duplicado | `Person(id=200, age=30, alive=true)` + `Person(id=200, age=25, alive=true)` | 1º → `VALID` 2º → `DUPLICATED` | 1º → `VALID` 2º → `VALID` | No hay verificación de `id` duplicado | Abierto |
-
----
-
-## Convenciones de Estado
-
-| Estado | Significado |
-|---------|-------------|
-| **Abierto** | El defecto fue detectado pero no corregido. |
-| **En progreso** | El defecto se encuentra en análisis o corrección. |
-| **Resuelto** | El defecto fue corregido y validado mediante pruebas. |
+| Campo            | Detalle                                                                                   |
+|------------------|-------------------------------------------------------------------------------------------|
+| **ID**           | DEF-02                                                                                    |
+| **Caso**         | Persona con id = 0                                                                        |
+| **Esperado**     | `INVALID`                                                                                 |
+| **Obtenido**     | `VALID` (implementación inicial sin validación de id)                                     |
+| **Causa**        | No existía regla para rechazar ids menores o iguales a 0                                  |
+| **Ciclo TDD**    | RED – la prueba `shouldReturnInvalidWhenIdIsZero()` falló correctamente                   |
+| **Corrección**   | Se agregó: `if (person.getId() < MIN_VALID_ID) return RegisterResult.INVALID;`            |
+| **Estado**       | ✅ Cerrado                                                                                |
 
 ---
 
-## Observaciones
+## Defecto 03
 
-- Se pueden usar **ambos formatos** o elegir uno como estándar de equipo.
-- El objetivo es **gestionar la calidad del software** y **demostrar un proceso sistemático de testing**.
-- Mantener este archivo actualizado durante todo el ciclo de desarrollo.
+| Campo            | Detalle                                                                                   |
+|------------------|-------------------------------------------------------------------------------------------|
+| **ID**           | DEF-03                                                                                    |
+| **Caso**         | Persona menor de 18 años (`age = 17`)                                                     |
+| **Esperado**     | `UNDERAGE`                                                                                |
+| **Obtenido**     | `VALID` (implementación inicial sin validación de edad mínima para votar)                 |
+| **Causa**        | Faltaba regla de negocio: edad mínima para votar es 18 años                               |
+| **Ciclo TDD**    | RED – la prueba `shouldRejectUnderageAt17()` falló correctamente                          |
+| **Corrección**   | Se agregó: `if (person.getAge() < MIN_VOTING_AGE) return RegisterResult.UNDERAGE;`        |
+| **Estado**       | ✅ Cerrado                                                                                |
+
+---
+
+## Defecto 04
+
+| Campo            | Detalle                                                                                   |
+|------------------|-------------------------------------------------------------------------------------------|
+| **ID**           | DEF-04                                                                                    |
+| **Caso**         | Segunda inscripción con el mismo id (id = 777)                                            |
+| **Esperado**     | `DUPLICATED`                                                                              |
+| **Obtenido**     | `VALID` (sin control de unicidad)                                                         |
+| **Causa**        | La implementación inicial no llevaba registro de ids ya inscritos                         |
+| **Ciclo TDD**    | RED – la prueba `shouldReturnDuplicatedWhenSameIdRegisteredTwice()` falló correctamente   |
+| **Corrección**   | Se introdujo `Set<Integer> registeredIds` y la validación de duplicado antes de registrar |
+| **Estado**       | ✅ Cerrado                                                                                |
+
+---
+
+> **Nota:** Todos los defectos fueron detectados por las pruebas unitarias **antes** de escribir el código de producción, siguiendo el ciclo TDD: RED → GREEN → REFACTOR.
